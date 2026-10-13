@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>911 GT3 RS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..600&display=swap" rel="stylesheet">
+<style>
+  :root{--cream:#f6ead8;--muted:#b7a78d;--gold:#d9a441;--ink:#120d07;--deep:#1c140a;
+    --font:"Archivo","Helvetica Neue",Arial,sans-serif;--pad:clamp(20px,4vw,56px)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--ink)}
+  body{font-family:var(--font);color:var(--cream);background:var(--ink);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  a:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+
+  /* Film: track height sets how long it plays; the last part of the track holds the final frame */
+  .track{position:relative;height:760vh}
+  .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+  #film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--ink)}
+
+  .finale{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .9s ease}
+  .finale.on{opacity:1}
+  .finale::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(18,13,7,.8) 0,rgba(18,13,7,.35) 30%,rgba(18,13,7,0) 55%)}
+  .finale div{position:absolute;left:var(--pad);bottom:max(44px,env(safe-area-inset-bottom));transform:translateY(16px);transition:transform .9s ease}
+  .finale.on div{transform:none}
+  .finale h1{font-weight:300;font-stretch:125%;font-size:clamp(44px,9vw,148px);line-height:.95;letter-spacing:-.025em}
+  .finale p{margin-top:16px;font-size:clamp(15px,1.3vw,18px);color:var(--cream);opacity:.85}
+
+  .rail{position:absolute;right:clamp(14px,2.2vw,32px);top:50%;height:120px;width:2px;margin-top:-60px;background:rgba(246,234,216,.35)}
+  .rail i{position:absolute;inset:0;background:var(--gold);transform-origin:top;transform:scaleY(0)}
+
+  /* Specs */
+  .specs{padding:clamp(72px,10vw,150px) var(--pad);background:var(--ink)}
+  .specs h2{font-weight:300;font-stretch:125%;font-size:clamp(34px,5vw,76px);letter-spacing:-.02em;line-height:1}
+  .specs .lead{margin-top:18px;color:var(--muted);font-size:clamp(15px,1.3vw,18px);max-width:52ch;line-height:1.55}
+  .grid{margin-top:clamp(36px,5vw,72px);display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .tile{background:linear-gradient(160deg,#241a0d,#17100a);border:1px solid rgba(217,164,65,.2);border-radius:6px;
+    padding:clamp(20px,2.4vw,34px);display:flex;flex-direction:column;justify-content:space-between;min-height:200px}
+  .tile.big{grid-column:span 2;grid-row:span 2;min-height:420px}
+  .tile.wide{grid-column:span 2}
+  .tile b{font-weight:300;font-stretch:125%;font-size:clamp(40px,4.6vw,76px);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .tile.big b{font-size:clamp(80px,12vw,190px)}
+  .tile b em{font-style:normal;font-size:.34em;letter-spacing:0;color:var(--gold);margin-left:.25em;font-stretch:100%;font-weight:500}
+  .tile h3{font-size:15px;font-weight:600;margin-top:28px}
+  .tile p{font-size:14px;color:var(--muted);margin-top:4px;line-height:1.45}
+
+  /* Footer */
+  footer{padding:clamp(48px,6vw,88px) var(--pad) max(36px,env(safe-area-inset-bottom));background:#0b0805;border-top:1px solid rgba(217,164,65,.18)}
+  .foot{display:flex;flex-wrap:wrap;gap:40px;justify-content:space-between;align-items:flex-start}
+  .foot strong{font-weight:300;font-stretch:125%;font-size:clamp(26px,3vw,40px);letter-spacing:-.02em}
+  .foot nav{display:flex;gap:32px;font-size:15px}
+  .foot nav a{color:var(--muted)}
+  .foot nav a:hover{color:var(--cream)}
+  .fine{margin-top:clamp(40px,6vw,80px);font-size:13px;color:var(--muted);line-height:1.6;max-width:70ch}
+
+
+  /* Navigation: glass pill with a sliding gold marker on the active page */
+  .nav{position:fixed;top:max(18px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:15;
+    display:flex;padding:6px;border-radius:999px;
+    background:rgba(24,16,8,.55);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+    box-shadow:0 10px 30px rgba(0,0,0,.28)}
+  .nav::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+    background:linear-gradient(135deg,#fff 0%,#8f8f8f 25%,#ececec 50%,#858585 75%,#fff 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+  .nav .pill{position:absolute;top:6px;bottom:6px;left:6px;width:0;border-radius:999px;pointer-events:none;
+    background:linear-gradient(160deg,#f3dd93 0%,#d9a441 55%,#b9822a 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 4px 14px rgba(217,164,65,.45);
+    transition:transform .45s cubic-bezier(.3,.8,.2,1),width .45s cubic-bezier(.3,.8,.2,1)}
+  .nav a{position:relative;z-index:1;padding:14px clamp(20px,3.2vw,40px);border-radius:999px;
+    font-size:clamp(12px,1.1vw,15px);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cream);
+    transition:color .3s}
+  .nav a[aria-current="page"]{color:var(--ink)}
+  .nav a:focus-visible{outline:2px solid var(--cream);outline-offset:-3px}
+
+  .loader{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--ink);text-align:center;transition:opacity .8s ease,visibility .8s;padding:24px}
+  .loader.done{opacity:0;visibility:hidden}
+  .loader p{font-size:clamp(18px,2.2vw,26px);font-weight:300;font-stretch:125%}
+  .loader small{display:block;margin-top:12px;font-size:14px;color:var(--gold);max-width:48ch;line-height:1.5}
+
+  .cursor{position:fixed;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border:1px solid var(--cream);border-radius:50%;
+    pointer-events:none;z-index:30;opacity:0;transition:opacity .3s,width .3s,height .3s,margin .3s;mix-blend-mode:difference}
+  .cursor.show{opacity:.9}
+  .cursor.down{width:20px;height:20px;margin:-10px 0 0 -10px;background:var(--cream)}
+  @media (pointer:coarse){.cursor{display:none}}
+
+  @media (max-width:860px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .tile.big{grid-column:span 2;grid-row:auto;min-height:300px}
+    .tile.wide{grid-column:span 2}
+  }
+  @media (prefers-reduced-motion:reduce){.finale,.finale div,.nav .pill{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader" role="status"><div><p id="msg">Loading the film</p><small id="sub"></small></div></div>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<nav class="nav" id="nav" aria-label="Main">
+  <span class="pill" id="pill" aria-hidden="true"></span>
+  <a href="#track" data-target="track" aria-current="page">Home</a>
+  <a href="#specs" data-target="specs">Specs</a>
+  <a href="#about" data-target="about">About</a>
+</nav>
+
+<main>
+  <section class="track" id="track">
+    <div class="stage">
+      <canvas id="film" role="img" aria-label="Golden Porsche 911 GT3 RS film, controlled by scrolling"></canvas>
+      <div class="finale" id="finale">
+        <div>
+          <h1>911 GT3 RS</h1>
+          <p>Specifications below</p>
+        </div>
+      </div>
+      <div class="rail" aria-hidden="true"><i id="fill"></i></div>
+    </div>
+  </section>
+
+  <section class="specs" id="specs">
+    <h2>Specifications</h2>
+    <p class="lead">Published figures for the 911 GT3 RS.</p>
+    <div class="grid">
+      <div class="tile big"><b>525<em>PS</em></b><div><h3>Power</h3><p>386 kW at 8,500 rpm</p></div></div>
+      <div class="tile"><b>465<em>Nm</em></b><div><h3>Torque</h3><p>At 6,300 rpm</p></div></div>
+      <div class="tile"><b>3.2<em>s</em></b><div><h3>0 to 100 km/h</h3><p>Standing start</p></div></div>
+      <div class="tile"><b>296<em>km/h</em></b><div><h3>Top speed</h3><p>Maximum</p></div></div>
+      <div class="tile"><b>4.0<em>L</em></b><div><h3>Flat-six engine</h3><p>Naturally aspirated, 9,000 rpm limit</p></div></div>
+      <div class="tile wide"><b>1,450<em>kg</em></b><div><h3>Unladen weight</h3><p>DIN standard</p></div></div>
+      <div class="tile wide"><b>7<em>speed</em></b><div><h3>PDK transmission</h3><p>Dual-clutch, rear-wheel drive</p></div></div>
+    </div>
+  </section>
+</main>
+
+<footer id="about">
+  <div class="foot">
+    <strong>911 GT3 RS</strong>
+    <nav aria-label="Footer">
+      <a href="#track">Film</a>
+      <a href="#specs">Specifications</a>
+      <a href="#track">Back to top</a>
+    </nav>
+  </div>
+  <p class="fine">Figures are the published values for the 911 GT3 RS and can vary by market.</p>
+</footer>
+
+<script>
+(() => {
+  // ================= CONFIG =================
+  const FRAME_COUNT   = 732;            // number of images inside /frames
+  const FRAME_PREFIX  = 'frames/frame_'; // file name before the number
+  const FRAME_DIGITS  = 4;              // frame_0001 -> 4 digits
+  const FRAME_EXT     = '.webp';
+  const INITIAL_FRAMES = 60;            // loaded before the page opens; the rest load in the background
+  const PARALLEL      = 6;              // images downloaded at once
+  const HOLD          = 0.88;           // film plays over the first 88% of the scroll, then the last frame holds
+  // ==========================================
+
+  const canvas = document.getElementById('film');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  const track = document.getElementById('track');
+  const fill = document.getElementById('fill');
+  const finale = document.getElementById('finale');
+  const loader = document.getElementById('loader');
+  const cursor = document.getElementById('cursor');
+  const msg = document.getElementById('msg'), sub = document.getElementById('sub');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const frames = new Array(FRAME_COUNT);
+  const loaded = new Uint8Array(FRAME_COUNT);
+  let loadedCount = 0, failed = 0, shown = false;
+  const url = i => FRAME_PREFIX + String(i + 1).padStart(FRAME_DIGITS, '0') + FRAME_EXT;
+
+  function reveal(){ if (shown) return; shown = true; loader.classList.add('done'); }
+
+  function loadFrame(i){
+    return new Promise(done => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => { frames[i] = img; loaded[i] = 1; loadedCount++; done(); };
+      img.onerror = () => { failed++; done(); };
+      img.src = url(i);
+    });
+  }
+
+  async function loadAll(){
+    let next = 0;
+    const need = Math.min(INITIAL_FRAMES, FRAME_COUNT);
+    const worker = async () => {
+      while (next < FRAME_COUNT){
+        await loadFrame(next++);
+        if (!shown){
+          sub.textContent = 'Loading frames ' + Math.min(100, Math.round(loadedCount / need * 100)) + '%';
+          if (loadedCount >= need) reveal();
+          else if (loadedCount === 0 && failed >= 3){
+            msg.textContent = 'The frames could not be loaded';
+            sub.textContent = 'Check that ' + url(0) + ' exists, and open the page through a web server (or GitHub Pages), not by double-clicking.';
+          }
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: PARALLEL }, worker));
+    reveal();
+  }
+  loadAll();
+
+  // Canvas is sized to the screen in real pixels (up to 4K), so frames stay sharp
+  function resize(){
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.min(3840, Math.round(innerWidth * dpr));
+    canvas.width = w;
+    canvas.height = Math.round(w * innerHeight / innerWidth);
+    ctx.imageSmoothingQuality = 'high';
+    lastDrawn = -1;
+  }
+
+  function draw(i){
+    const img = frames[i];
+    if (!img) return false;
+    const cw = canvas.width, ch = canvas.height;
+    const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight); // cover
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+    return true;
+  }
+
+  // While frames are still downloading, show the closest one that is ready
+  function nearest(i){
+    if (loaded[i]) return i;
+    for (let d = 1; d < FRAME_COUNT; d++){
+      if (i - d >= 0 && loaded[i - d]) return i - d;
+      if (i + d < FRAME_COUNT && loaded[i + d]) return i + d;
+    }
+    return -1;
+  }
+
+  function progress(){
+    const max = track.offsetHeight - innerHeight;
+    return Math.min(1, Math.max(0, -track.getBoundingClientRect().top / max));
+  }
+
+  let cur = 0, last = performance.now(), lastDrawn = -1;
+  resize();
+  addEventListener('resize', resize);
+
+  function tick(now){
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    const p = progress();
+    const pv = Math.min(1, p / HOLD);
+    const target = pv * (FRAME_COUNT - 1);
+
+    // Time-based easing: same feel on 60Hz and 144Hz screens
+    const dir = Math.sign(target - cur);
+    cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt * 10));
+    if (Math.abs(target - cur) < 0.01) cur = target;
+
+    const idx = shown ? nearest(Math.round(cur)) : -1;
+    if (idx >= 0 && idx !== lastDrawn && draw(idx)){
+      lastDrawn = idx;
+      // Prepare the next few frames so they are ready to paint
+      for (let k = 1; k <= 4; k++){
+        const f = frames[idx + dir * k];
+        if (f && f.decode) f.decode().catch(() => {});
+      }
+    }
+
+    fill.style.transform = 'scaleY(' + p + ')';
+    // Title appears over the last ~10% of the film and stays on the held final frame
+    finale.classList.toggle('on', pv >= 0.9);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Navigation: highlight follows the section in view, gold marker slides to it
+  const links = [...document.querySelectorAll('#nav a')];
+  const pill = document.getElementById('pill');
+  const specsEl = document.getElementById('specs');
+  const aboutEl = document.getElementById('about');
+  let activeKey = '';
+  function place(a){ pill.style.width = a.offsetWidth + 'px'; pill.style.transform = 'translateX(' + (a.offsetLeft - 6) + 'px)'; }
+  function setActive(key){
+    if (key === activeKey) return;
+    activeKey = key;
+    links.forEach(a => { const on = a.dataset.target === key; if (on){ a.setAttribute('aria-current','page'); place(a); } else a.removeAttribute('aria-current'); });
+  }
+  function spy(){
+    const atEnd = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+    if (atEnd || aboutEl.getBoundingClientRect().top < innerHeight * 0.5) setActive('about');
+    else if (specsEl.getBoundingClientRect().top < innerHeight * 0.5) setActive('specs');
+    else setActive('track');
+  }
+  addEventListener('scroll', spy, { passive: true });
+  addEventListener('resize', () => { const a = links.find(x => x.dataset.target === activeKey); if (a) place(a); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const a = links.find(x => x.dataset.target === activeKey); if (a) place(a); });
+  links.forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.getElementById(a.dataset.target);
+    const top = a.dataset.target === 'track' ? 0 : t.getBoundingClientRect().top + scrollY;
+    scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+  }));
+  setActive('track'); spy();
+
+  let mx = innerWidth/2, my = innerHeight/2, cx = mx, cy = my;
+  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.classList.add('show'); });
+  addEventListener('mousedown', () => cursor.classList.add('down'));
+  addEventListener('mouseup', () => cursor.classList.remove('down'));
+  document.addEventListener('mouseleave', () => cursor.classList.remove('show'));
+  (function follow(){
+    cx += (mx - cx) * 0.18; cy += (my - cy) * 0.18;
+    cursor.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
+    requestAnimationFrame(follow);
+  })();
+})();
+</script>
+</body>
+</html>
